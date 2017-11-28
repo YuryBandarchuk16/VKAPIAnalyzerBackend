@@ -1,4 +1,5 @@
 import spark.servlet.SparkApplication;
+import vk.api.methods.UsersGet;
 
 import static spark.Spark.get;
 
@@ -11,6 +12,9 @@ public class HelloWorld implements SparkApplication {
 	@Override
 	public void init() {
 
-		get("/hello", (req, res) -> "Hello VK!");
+		get("/hello", (req, res) -> {
+			new UsersGet().test(5000L);
+			return "Hello VK!";
+		});
 	}
 }
