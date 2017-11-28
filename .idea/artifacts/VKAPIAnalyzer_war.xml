@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="VKAPIAnalyzer:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="vk-api-analyzer-1.0.war">
+      <element id="artifact" artifact-name="VKAPIAnalyzer:war exploded" />
+    </root>
+  </artifact>
+</component>
