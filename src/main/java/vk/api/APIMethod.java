@@ -74,7 +74,8 @@ public abstract class APIMethod implements APIMethodTestable {
             String json = gson.toJson(responseBody);
             System.out.println(json);
 
-            /*** Calculating all required time statistics ***/
+            // Calculating all required time statistics
+
             Double processingTime = Double.parseDouble(response.headers().
                     toMultimap().
                     get(Constants.PROCESSING_TIME_HEADER_RESPONSE).

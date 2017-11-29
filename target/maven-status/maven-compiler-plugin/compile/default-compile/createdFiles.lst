@@ -1,1 +1,13 @@
+database/MySQLDao.class
+vk/api/APIMethod.class
+database/TestDB.class
+utils/ThreadPool.class
+vk/api/methods/UsersGet.class
+vk/api/test/TestResult$Builder.class
+vk/api/MethodsSingleton.class
+vk/api/Constants.class
+vk/api/test/TestResult.class
+database/PlotPointDB.class
+vk/api/exceptions/APIMethodException.class
 HelloWorld.class
+vk/api/APIMethodTestable.class
