@@ -15,24 +15,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class APIMethod implements APIMethodTestable {
 
-    /*
-
-    // Will be sent only in case isReady() == false
-    void sendRequest() throws IOException;
-    boolean wasRequestSent();
-
-    boolean isReady();
-    void prepareForNewRequest();
-
-    Double getFullTime();
-    Double getProcessingTime();
-    Double getNetworkTime();
-
-    Gson getResponse();
-
-    void addHeader(String name, String value);
-     */
-
     private String name;
     private Map<String, String> headers;
     private List<TestResult> results;
@@ -43,16 +25,6 @@ public abstract class APIMethod implements APIMethodTestable {
         this.headers = new HashMap<>();
         this.timeBeforeLastRequest = new AtomicLong(0L);
     }
-
-    /*private Request buildRequest() {
-        Request.Builder requestBuilder = new Request.Builder().url(Constants.VK_API_URL + name + "?");
-        for (Map.Entry<String, String> entry: headers.entrySet()) {
-            requestBuilder.addHeader(entry.getKey(), entry.getValue());
-        }
-        requestBuilder.addHeader(Constants.PROCESSING_TIME_HEADER_REQUEST, "1");
-        requestBuilder.addHeader(Constants.ACCESS_TOKEN_HEADER, Constants.ACCESS_TOKEN);
-        return requestBuilder.build();
-    }*/
 
     private void addKeyValuePair(StringBuilder builder, String key, String value, String ending) {
         builder.append(key);
@@ -67,7 +39,6 @@ public abstract class APIMethod implements APIMethodTestable {
         for (Map.Entry<String, String> entry: headers.entrySet()) {
             addKeyValuePair(urlBuilder, entry.getKey(), entry.getValue(), "&");
         }
-        //addKeyValuePair(urlBuilder, Constants.PROCESSING_TIME_HEADER_REQUEST, "1", "&");
         addKeyValuePair(urlBuilder, Constants.ACCESS_TOKEN_HEADER, Constants.ACCESS_TOKEN, "&v=V");
         Request request = new Request.Builder()
                 .url(urlBuilder.toString())
@@ -79,7 +50,9 @@ public abstract class APIMethod implements APIMethodTestable {
     public void sendRequest()  {
         OkHttpClient client = new OkHttpClient();
         Request request = buildRequest();
-        System.out.println(request.url().toString());
+
+        // The URL of the current request could be tracked here
+
         Response response;
         try {
             response = client.newCall(request).execute();
@@ -100,11 +73,25 @@ public abstract class APIMethod implements APIMethodTestable {
             String responseBody = response.body().string();
             String json = gson.toJson(responseBody);
             System.out.println(json);
-            System.out.println(response.headers().toString());
-            // do something with time here
-            results.add(new TestResult.Builder().build());
-        } catch (Exception e) {
-            // some clever code to sort out this situation
+
+            /*** Calculating all required time statistics ***/
+            Double processingTime = Double.parseDouble(response.headers().
+                    toMultimap().
+                    get(Constants.PROCESSING_TIME_HEADER_RESPONSE).
+                    get(0));
+            long fullTimeMillis = System.currentTimeMillis() - timeBeforeLastRequest.get();
+            Double fullTime = 1.0 * fullTimeMillis / 1000.0;
+            Double networkTime = fullTime - processingTime;
+            TestResult currentResult = new TestResult.Builder()
+                    .setFullTime(fullTime)
+                    .setNetworkTime(networkTime)
+                    .setProcessingTime(processingTime)
+                    .build();
+
+            synchronized (results) {
+                results.add(currentResult);
+            }
+        } catch (Exception ignored) {
         } finally {
             synchronized (results) {
                 results.notify();
@@ -141,6 +128,9 @@ public abstract class APIMethod implements APIMethodTestable {
             }
         }
         System.out.println(results.size() + " added!");
+        for (TestResult result: results) {
+            System.out.println(result.toString());
+        }
     }
 
 }

@@ -3,7 +3,6 @@ package vk.api.methods;
 import utils.ThreadPool;
 import vk.api.APIMethod;
 
-import java.io.IOException;
 import java.util.Random;
 
 public class UsersGet extends APIMethod {
