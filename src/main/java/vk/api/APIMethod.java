@@ -153,7 +153,8 @@ public abstract class APIMethod implements APIMethodTestable {
         } else {
             testDB.setMeasureType(2);
         }
-        System.out.println("VIKA!");
+        testDB.setMethodName(name);
+        System.out.println("SENDING DATA TO MYDAO TO EXECUTE UPDATE AND ADD DATA!");
         MyDAO.getSharedInstance().addPointsForTest(filteredPoints, testDB);
     }
 

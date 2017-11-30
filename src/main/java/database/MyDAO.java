@@ -40,6 +40,7 @@ public class MyDAO {
                 "leftPoint int NOT NULL," +
                 "rightPoint int NOT NULL," +
                 "measureType int NOT NULL," +
+                "methodName varchar(20) NOT NULL," +
                 "PRIMARY KEY (id));";
         String createRecordsTableSql = "CREATE TABLE IF NOT EXISTS points (" +
                 "id int NOT NULL," +
@@ -71,7 +72,7 @@ public class MyDAO {
     }
 
     public TestDB getTestWhereIdEqualsTo(Integer targetId) {
-        String sql = "SELECT id, leftPoint, rightPoint, measureType " +
+        String sql = "SELECT id, leftPoint, rightPoint, measureType, methodName " +
                 "FROM tests " +
                 "WHERE id = :targetId;";
         List<TestDB> queryResultList = null;
@@ -136,6 +137,8 @@ public class MyDAO {
             lastId = maxId.intValue();
         }
 
+        int minimalId = lastId + 1;
+
         for (int i = 0; i < points.size(); i++) {
             PlotPointDB point = points.get(i);
             try (Connection connection = sql2o.open()) {
@@ -155,6 +158,8 @@ public class MyDAO {
             }
         }
 
+        int maximalId = lastId;
+
         String selectMaxIdSqlFromTests = "SELECT coalesce(MAX(id), 0) AS singleField FROM tests;";
 
         int lastTestId = 0;
@@ -163,15 +168,22 @@ public class MyDAO {
             lastTestId = maxTestId.intValue();
         }
 
-        String addTestSql = "INSERT INTO tests(id, leftPoint, rightPoint, measureType) " +
-                "values (:idParam, :leftPointParam, :rightPointParam, :measureTypeParam);";
+        String addTestSql = "INSERT INTO tests(id, leftPoint, rightPoint, measureType, methodName) " +
+                "values (:idParam, :leftPointParam, :rightPointParam, :measureTypeParam, :methodNameParam);";
+
+        test.setLeftPoint(minimalId);
+        test.setRightPoint(maximalId);
 
         try (Connection connection = sql2o.open()) {
             connection.createQuery(addTestSql)
                     .addParameter("idParam", lastTestId + 1)
                     .addParameter("leftPointParam", test.getLeftPoint())
                     .addParameter("rightPointParam", test.getRightPoint())
-                    .addParameter("measureTypeParam", test.getMeasureType());
+                    .addParameter("measureTypeParam", test.getMeasureType())
+                    .addParameter("methodNameParam", test.getMethodName())
+                    .executeUpdate();
+            System.out.println("YO! ADDED NEW TEST WITH ID = " + (lastTestId + 1) + " left: " + test.getLeftPoint()
+                    + " right: " + test.getRightPoint() + " type: " + test.getMeasureType());
         } catch (Exception e) {
             System.out.println("ERROR HAPPENED WHILE ADDING NEW TEST INTO tests!");
             System.out.println(e.getMessage());
@@ -188,6 +200,7 @@ public class MyDAO {
             result = connection.createQuery(sql).executeAndFetch(TestDB.class);
         }
         if (result == null) {
+            System.out.println("GOT NULL WHEN GETTING TESTS!!!!");
             result = new ArrayList<>();
         }
         return result;

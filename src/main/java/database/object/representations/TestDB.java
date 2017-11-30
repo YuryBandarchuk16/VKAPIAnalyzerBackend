@@ -6,6 +6,7 @@ public class TestDB {
     private Integer leftPoint;
     private Integer rightPoint;
     private Integer measureType;
+    private String methodName;
 
     public Integer getId() {
         return id;
@@ -37,5 +38,13 @@ public class TestDB {
 
     public void setMeasureType(Integer measureType) {
         this.measureType = measureType;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 }
