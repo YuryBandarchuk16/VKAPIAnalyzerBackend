@@ -26,7 +26,7 @@ public class HelloWorld implements SparkApplication {
 	@Override
 	public void init() {
 
-		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstsance().getMethods();
+		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstance().getMethods();
 
 		sqlDao = MyDAO.getSharedInstance();
 

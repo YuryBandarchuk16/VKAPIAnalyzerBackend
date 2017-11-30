@@ -17,12 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public abstract class APIMethod implements APIMethodTestable {
 
     private String name;
-    private Map<String, String> headers;
+    protected Map<String, String> headers;
     private List<TestResult> results;
     private AtomicLong timeBeforeLastRequest;
 
@@ -56,7 +55,7 @@ public abstract class APIMethod implements APIMethodTestable {
     private static final long READ_TIMEOUT = 10L * 1000L;
 
     public void sendRequest()  {
-        OkHttpClient client = MethodsSingleton.getSharedInstsance().getClient()
+        OkHttpClient client = MethodsSingleton.getSharedInstance().getClient()
                 .newBuilder()
                 .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
                 .build();
@@ -82,7 +81,7 @@ public abstract class APIMethod implements APIMethodTestable {
         try {
             String responseBody = response.body().string();
             String json = gson.toJson(responseBody);
-            //System.out.println(json);
+            System.out.println(json);
 
             // Calculating all required time statistics
 
