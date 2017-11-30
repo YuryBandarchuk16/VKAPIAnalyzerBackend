@@ -57,15 +57,20 @@ public class HelloWorld implements SparkApplication {
 			}
 		});
 
+
+		/* Method for debug purpose only!!! */
 		get("/points", (req, res) -> new Gson().toJson(sqlDao.getAllPoints()));
 
+		/* Method for debug purpose only!!! */
 		get("/tests", (req, res) -> new Gson().toJson(sqlDao.getAllTests()));
 
+		/* Clears 'points' table */
 		get("/clear/points", (req, res) -> {
 			MyDAO.getSharedInstance().clearTable("points");
 			return "[\"ok\"]";
 		});
 
+		/* Clears 'tests' table */
 		get("/clear/tests", (req, res) -> {
 			MyDAO.getSharedInstance().clearTable("tests");
 			return "[\"ok\"]";

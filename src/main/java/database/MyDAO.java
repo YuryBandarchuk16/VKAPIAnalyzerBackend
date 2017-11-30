@@ -77,32 +77,25 @@ public class MyDAO {
             System.out.println(e.getMessage());
             e.printStackTrace();
             failure = true;
-        } finally {
-            return null;
         }
+        return null;
     }
 
     public TestDB getTestWhereIdEqualsTo(Integer targetId) {
         String sql = "SELECT id, leftPoint, rightPoint, measureType, methodName " +
                 "FROM tests " +
                 "WHERE id = :targetId;";
-        List<TestDB> queryResultList = null;
         try (Connection connection = sql2o.open()) {
-            queryResultList = connection.createQuery(sql)
+            return connection.createQuery(sql)
                     .addParameter("targetId", targetId)
-                    .executeAndFetch(TestDB.class);
+                    .executeAndFetchFirst(TestDB.class);
         } catch (Exception e) {
             System.out.println("GET TEST WITH TARGET ID ERROR!");
             System.out.println(e.getMessage());
             e.printStackTrace();
             failure = true;
-        } finally {
-            if (queryResultList != null && queryResultList.size() == 1) {
-                return queryResultList.get(0);
-            } else {
-                return null;
-            }
         }
+        return null;
     }
 
     public void clearTable(String tableName) {
