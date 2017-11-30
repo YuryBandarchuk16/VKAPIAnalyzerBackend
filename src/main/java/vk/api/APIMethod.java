@@ -143,10 +143,7 @@ public abstract class APIMethod implements APIMethodTestable {
         //    System.out.println(result.toString());
         //}
         System.out.println("Before STREAM!");
-        List<PlotPointDB> filteredPoints = ResultsFilter.removeNoise(results)
-                .stream()
-                .map((t) -> new PlotPointDB(t))
-                .collect(Collectors.toList());
+        List<PlotPointDB> filteredPoints = ResultsFilter.removeNoise(results);
         System.out.println("AFTER STREAM!");
         TestDB testDB = new TestDB();
         if (duration == Constants.ONE_MINUTE_DURATION) {
