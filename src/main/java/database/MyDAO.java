@@ -33,6 +33,17 @@ public class MyDAO {
         createTablesIfNotExist();
     }
 
+    private void executeUpdate(String sql) {
+        try (Connection connection = sql2o.open()) {
+            connection.createQuery(sql).executeUpdate();
+        } catch (Exception e) {
+            System.out.println("ERROR HAPPENED WHILE EXECUTING SOME UPDATE QUERY: " + sql + "!");
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            failure = true;
+        }
+    }
+
     private void createTablesIfNotExist() {
         failure = false;
         String createSessionsTableSql = "CREATE TABLE IF NOT EXISTS tests (" +
