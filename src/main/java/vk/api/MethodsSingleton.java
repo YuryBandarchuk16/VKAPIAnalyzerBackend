@@ -1,6 +1,7 @@
 package vk.api;
 
 
+import okhttp3.OkHttpClient;
 import vk.api.methods.UsersGet;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ public class MethodsSingleton  {
     private static volatile MethodsSingleton sharedInstsance;
 
     private MethodsSingleton() {
+        client = new OkHttpClient();
     }
 
     public static MethodsSingleton getSharedInstsance() {
@@ -23,6 +25,7 @@ public class MethodsSingleton  {
     }
 
     private List<APIMethodTestable> methods;
+    private OkHttpClient client;
 
 
     {
@@ -44,5 +47,9 @@ public class MethodsSingleton  {
 
     public List<APIMethodTestable> getMethods() {
         return methods;
+    }
+
+    public OkHttpClient getClient() {
+        return client;
     }
 }

@@ -1,9 +1,13 @@
 package vk.api;
 
 import com.google.gson.Gson;
+import database.MyDAO;
+import database.object.representations.PlotPointDB;
+import database.object.representations.TestDB;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import utils.ResultsFilter;
 import vk.api.test.TestResult;
 
 import java.io.IOException;
@@ -11,7 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public abstract class APIMethod implements APIMethodTestable {
 
@@ -47,8 +53,13 @@ public abstract class APIMethod implements APIMethodTestable {
         return request;
     }
 
+    private static final long READ_TIMEOUT = 10L * 1000L;
+
     public void sendRequest()  {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = MethodsSingleton.getSharedInstsance().getClient()
+                .newBuilder()
+                .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
+                .build();
         Request request = buildRequest();
 
         // The URL of the current request could be tracked here
@@ -68,11 +79,10 @@ public abstract class APIMethod implements APIMethodTestable {
         }
 
         Gson gson = new Gson();
-
         try {
             String responseBody = response.body().string();
             String json = gson.toJson(responseBody);
-            System.out.println(json);
+            //System.out.println(json);
 
             // Calculating all required time statistics
 
@@ -129,9 +139,25 @@ public abstract class APIMethod implements APIMethodTestable {
             }
         }
         System.out.println(results.size() + " added!");
-        for (TestResult result: results) {
-            System.out.println(result.toString());
+        //for (TestResult result: results) {
+        //    System.out.println(result.toString());
+        //}
+        System.out.println("Before STREAM!");
+        List<PlotPointDB> filteredPoints = ResultsFilter.removeNoise(results)
+                .stream()
+                .map((t) -> new PlotPointDB(t))
+                .collect(Collectors.toList());
+        System.out.println("AFTER STREAM!");
+        TestDB testDB = new TestDB();
+        if (duration == Constants.ONE_MINUTE_DURATION) {
+            testDB.setMeasureType(0);
+        } else if (duration == Constants.ONE_HOUR_DURATION) {
+            testDB.setMeasureType(1);
+        } else {
+            testDB.setMeasureType(2);
         }
+        System.out.println("VIKA!");
+        MyDAO.getSharedInstance().addPointsForTest(filteredPoints, testDB);
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 public class ThreadPool {
 
-    private static final int NUM_THREADS = 20;
+    private static final int NUM_THREADS = 30;
 
     private static volatile ThreadPool sharedInstance;
 

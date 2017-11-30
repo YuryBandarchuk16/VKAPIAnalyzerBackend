@@ -1,12 +1,12 @@
 import com.google.gson.Gson;
-import database.MySQLDao;
-import database.PlotPointDB;
-import database.TestDB;
+import database.MyDAO;
+import database.object.representations.PlotPointDB;
+import database.object.representations.TestDB;
 import spark.servlet.SparkApplication;
+import utils.ThreadPool;
 import vk.api.APIMethodTestable;
 import vk.api.Constants;
 import vk.api.MethodsSingleton;
-import vk.api.methods.UsersGet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,28 +21,28 @@ public class HelloWorld implements SparkApplication {
 		new HelloWorld().init();
 	}
 
-	private MySQLDao sqlDao;
+	private MyDAO sqlDao;
 
 	@Override
 	public void init() {
 
 		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstsance().getMethods();
 
-		sqlDao = MySQLDao.getSharedInstance();
+		sqlDao = MyDAO.getSharedInstance();
 
-		final String response;
-
-		if (sqlDao.hasFailed()) {
-			response = "FAIL! :(";
-		} else {
-			response = "Everything is OK!";
-		}
-
-		get("/test", (req, res) -> response);
+		get("/test", (req, res) -> {
+			final String response;
+			if (sqlDao.hasFailed()) {
+				response = "FAIL! :(";
+			} else {
+				response = "Everything is OK!";
+			}
+			return response;
+		});
 
 		get("/getPlot/:id", (req, res) -> {
 			Map<String, String> params = req.params();
-			String idValue = params.get("id");
+			String idValue = params.get(":id");
 			Integer id = Integer.parseInt(idValue);
 			TestDB testObject = sqlDao.getTestWhereIdEqualsTo(id);
 			if (testObject == null) {
@@ -57,13 +57,28 @@ public class HelloWorld implements SparkApplication {
 			}
 		});
 
+		get("/points", (req, res) -> new Gson().toJson(sqlDao.getAllPoints()));
+
+		get("/tests", (req, res) -> new Gson().toJson(sqlDao.getAllTests()));
+
+		get("/clear/points", (req, res) -> {
+			MyDAO.getSharedInstance().clearTable("points");
+			return "[\"ok\"]";
+		});
+
+		get("/clear/tests", (req, res) -> {
+			MyDAO.getSharedInstance().clearTable("tests");
+			return "[\"ok\"]";
+		});
+
 		// type == 0 --> minute
 		// type == 1 --> hour
 		// type == 2 --> day
 
 		get("/testMethod/:name/:type", (req, res) -> {
 			Map<String, String> params = req.params();
-			String methodName = params.get("name");
+			String methodName = params.get(":name");
+			System.out.println(methodName);
 			APIMethodTestable methodToRun = null;
 			for (APIMethodTestable method: methods) {
 				if (method.getName().equals(methodName)) {
@@ -73,7 +88,7 @@ public class HelloWorld implements SparkApplication {
 			if (methodToRun == null) {
 				halt(401);
 			}
-			String typeString = params.get("type");
+			String typeString = params.get(":type");
 			Long duration = Constants.ONE_MINUTE_DURATION;
 			if (typeString != null) {
 				Integer type = Integer.parseInt(typeString);
@@ -83,7 +98,9 @@ public class HelloWorld implements SparkApplication {
 					duration = Constants.ONE_DAY_DURATION;
 				}
 			}
-			methodToRun.test(duration);
+			final APIMethodTestable finalMethod = methodToRun;
+			final Long finalDuration = duration;
+			ThreadPool.getSharedInstance().addTask(() -> finalMethod.test(finalDuration));
 			return "[\"ok\"]";
 		});
 

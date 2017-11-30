@@ -44,6 +44,6 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-api:9.3.2.v20150730" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
     <orderEntry type="library" name="Maven: org.sql2o:sql2o:1.5.4" level="project" />
-    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.6" level="project" />
+    <orderEntry type="library" name="Maven: postgresql:postgresql:9.1-901-1.jdbc4" level="project" />
   </component>
 </module>
