@@ -7,6 +7,7 @@
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/database/object/representations/PlotPointDB.java
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/HelloWorld.java
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/vk/api/methods/friends/FriendsGet.java
+/Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/vk/api/CorsFilter.java
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/vk/api/methods/groups/GroupsGetById.java
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/database/MyDAO.java
 /Users/YuryBandarchuk/Desktop/VK/VKAPIAnalyzer/src/main/java/vk/api/methods/board/BoardGetTopics.java

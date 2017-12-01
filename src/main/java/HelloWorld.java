@@ -2,10 +2,15 @@ import com.google.gson.Gson;
 import database.MyDAO;
 import database.object.representations.PlotPointDB;
 import database.object.representations.TestDB;
+import spark.Filter;
+import spark.Request;
+import spark.Response;
+import spark.Spark;
 import spark.servlet.SparkApplication;
 import utils.ThreadPool;
 import vk.api.APIMethodTestable;
 import vk.api.Constants;
+import vk.api.CorsFilter;
 import vk.api.MethodsSingleton;
 
 import java.util.ArrayList;
@@ -25,6 +30,8 @@ public class HelloWorld implements SparkApplication {
 
 	@Override
 	public void init() {
+
+		CorsFilter.apply();
 
 		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstance().getMethods();
 
