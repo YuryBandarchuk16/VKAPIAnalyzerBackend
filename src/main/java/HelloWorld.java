@@ -31,6 +31,8 @@ public class HelloWorld implements SparkApplication {
 	@Override
 	public void init() {
 
+
+
 		CorsFilter.apply();
 
 		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstance().getMethods();
@@ -46,7 +48,7 @@ public class HelloWorld implements SparkApplication {
 			}
 			return response;
 		});
-
+		
 		get("/getPlot/:id", (req, res) -> {
 			Map<String, String> params = req.params();
 			String idValue = params.get(":id");
