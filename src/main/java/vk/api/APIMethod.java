@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class APIMethod implements APIMethodTestable {
@@ -23,11 +24,13 @@ public abstract class APIMethod implements APIMethodTestable {
     private String name;
     protected Map<String, String> headers;
     private List<TestResult> results;
+    private AtomicInteger amountOfTests;
     private AtomicLong timeBeforeLastRequest;
 
     public APIMethod(String name) {
         this.name = name;
         this.headers = new HashMap<>();
+        this.amountOfTests = new AtomicInteger(0);
         this.timeBeforeLastRequest = new AtomicLong(0L);
     }
 
@@ -119,9 +122,22 @@ public abstract class APIMethod implements APIMethodTestable {
 
     protected abstract void prepareAndMakeRequest();
 
+    // Creates new unique identifier, always returns different values!
+    // Should be read only once!
+
+    private String getUID() {
+        amountOfTests.addAndGet(1);
+        return name + amountOfTests.toString();
+    }
+
     public void test(long duration) {
         results = new ArrayList<>();
         long startTime = System.currentTimeMillis();
+
+        String currentTestID = getUID();
+
+        MethodsSingleton.getSharedInstance().startTesting(name, currentTestID, startTime, duration);
+
         while (true) {
             timeBeforeLastRequest.set(System.currentTimeMillis());
             prepareAndMakeRequest();
@@ -137,13 +153,9 @@ public abstract class APIMethod implements APIMethodTestable {
                 break;
             }
         }
-        System.out.println(results.size() + " added!");
-        //for (TestResult result: results) {
-        //    System.out.println(result.toString());
-        //}
-        System.out.println("Before STREAM!");
+
         List<PlotPointDB> filteredPoints = ResultsFilter.removeNoise(results);
-        System.out.println("AFTER STREAM!");
+
         TestDB testDB = new TestDB();
         if (duration == Constants.ONE_MINUTE_DURATION) {
             testDB.setMeasureType(0);
@@ -153,7 +165,8 @@ public abstract class APIMethod implements APIMethodTestable {
             testDB.setMeasureType(2);
         }
         testDB.setMethodName(name);
-        System.out.println("SENDING DATA TO MYDAO TO EXECUTE UPDATE AND ADD DATA!");
+
+        MethodsSingleton.getSharedInstance().stopTesting(currentTestID);
         MyDAO.getSharedInstance().addPointsForTest(filteredPoints, testDB);
     }
 

@@ -2,10 +2,8 @@ import com.google.gson.Gson;
 import database.MyDAO;
 import database.object.representations.PlotPointDB;
 import database.object.representations.TestDB;
-import spark.Filter;
-import spark.Request;
-import spark.Response;
-import spark.Spark;
+import org.apache.commons.lang3.tuple.Pair;
+
 import spark.servlet.SparkApplication;
 import utils.ThreadPool;
 import vk.api.APIMethodTestable;
@@ -16,9 +14,13 @@ import vk.api.MethodsSingleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import utils.TestingQueueEntry;
 
 import static spark.Spark.get;
 import static spark.Spark.halt;
+
 
 public class HelloWorld implements SparkApplication {
 
@@ -30,8 +32,6 @@ public class HelloWorld implements SparkApplication {
 
 	@Override
 	public void init() {
-
-
 
 		CorsFilter.apply();
 
@@ -48,7 +48,16 @@ public class HelloWorld implements SparkApplication {
 			}
 			return response;
 		});
-		
+
+		get("/queue", (req, res) -> {
+			List<TestingQueueEntry> queueEntries = MethodsSingleton.getSharedInstance()
+																	.getQueue()
+																	.stream()
+																	.map(TestingQueueEntry::getEnrtyWithCurrentTime)
+																	.collect(Collectors.toList());
+			return new Gson().toJson(queueEntries);
+		});
+
 		get("/getPlot/:id", (req, res) -> {
 			Map<String, String> params = req.params();
 			String idValue = params.get(":id");
@@ -125,5 +134,6 @@ public class HelloWorld implements SparkApplication {
 			}
 			return new Gson().toJson(result);
 		});
+
 	}
 }
