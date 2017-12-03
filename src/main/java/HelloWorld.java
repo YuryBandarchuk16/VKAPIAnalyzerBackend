@@ -106,7 +106,6 @@ public class HelloWorld implements SparkApplication {
 		get("/testMethod/:name/:type", (req, res) -> {
 			Map<String, String> params = req.params();
 			String methodName = params.get(":name");
-			System.out.println(methodName);
 			APIMethodTestable methodToRun = null;
 			int methodIndex = -1;
 			for (int i = 0; i < methods.size(); i++) {

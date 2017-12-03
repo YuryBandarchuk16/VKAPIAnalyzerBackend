@@ -33,6 +33,10 @@ public class TestingQueueEntry {
         return duration;
     }
 
+    public Long getCurrentTime() {
+        return currentTime;
+    }
+
     public TestingQueueEntry getEnrtyWithCurrentTime() {
         return new TestingQueueEntry(name, startTime, duration, System.currentTimeMillis());
     }
