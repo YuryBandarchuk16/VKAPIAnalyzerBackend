@@ -2,8 +2,6 @@ package vk.api;
 
 
 import okhttp3.OkHttpClient;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import utils.TestingQueueEntry;
 import vk.api.methods.board.BoardGetTopics;
 import vk.api.methods.database.DatabaseGetCities;
@@ -26,7 +24,7 @@ public class MethodsSingleton  {
     private static volatile MethodsSingleton sharedInstance;
 
 
-    private Map<String, TestingQueueEntry> currentQueue;
+    private final Map<String, TestingQueueEntry> currentQueue;
 
     private MethodsSingleton() {
         client = new OkHttpClient();
@@ -34,14 +32,18 @@ public class MethodsSingleton  {
     }
 
     public void startTesting(String name, String uid, Long startTime, Long duration) {
-        currentQueue.put(uid, new TestingQueueEntry(name, startTime, duration));
+        synchronized (currentQueue) {
+            currentQueue.put(uid, new TestingQueueEntry(name, startTime, duration));
+        }
     }
 
     public void stopTesting(String uid) {
-        currentQueue.remove(uid);
+        synchronized (currentQueue) {
+            currentQueue.remove(uid);
+        }
     }
 
-    public List<TestingQueueEntry> getQueue() {
+    public synchronized List<TestingQueueEntry> getQueue() {
         List<TestingQueueEntry> testsInQueue = new ArrayList<>();
         for (Map.Entry<String, TestingQueueEntry> entry: currentQueue.entrySet()) {
             testsInQueue.add(entry.getValue());
@@ -59,28 +61,28 @@ public class MethodsSingleton  {
         return sharedInstance;
     }
 
-    private List<APIMethodTestable> methods;
+    private List<Class<? extends APIMethod>> methods;
     private OkHttpClient client;
 
 
     {
         methods = new ArrayList<>();
 
-        methods.add(new UsersGet());
-        methods.add(new UserGetFollowers());
-        methods.add(new FriendsGet());
-        methods.add(new GroupsGetById());
-        methods.add(new WallGet());
-        methods.add(new WallSearch());
-        methods.add(new DatabaseGetCities());
-        methods.add(new LikesGetList());
-        methods.add(new BoardGetTopics());
-        methods.add(new UtilsGetServerTime());
+        methods.add(UsersGet.class);
+        methods.add(UserGetFollowers.class);
+        methods.add(FriendsGet.class);
+        methods.add(GroupsGetById.class);
+        methods.add(WallGet.class);
+        methods.add(WallSearch.class);
+        methods.add(DatabaseGetCities.class);
+        methods.add(LikesGetList.class);
+        methods.add(BoardGetTopics.class);
+        methods.add(UtilsGetServerTime.class);
     }
 
 
 
-    public List<APIMethodTestable> getMethods() {
+    public List<Class<? extends APIMethod>> getMethods() {
         return methods;
     }
 

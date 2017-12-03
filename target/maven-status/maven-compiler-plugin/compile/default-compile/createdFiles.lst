@@ -14,6 +14,7 @@ HelloWorld.class
 database/object/representations/PlotPointDB.class
 vk/api/APIMethodTestable.class
 vk/api/methods/utils/UtilsGetServerTime.class
+utils/TestingQueueEntry.class
 database/MyDAO.class
 vk/api/methods/wall/WallGet.class
 vk/api/Constants.class

@@ -122,19 +122,12 @@ public abstract class APIMethod implements APIMethodTestable {
 
     protected abstract void prepareAndMakeRequest();
 
-    // Creates new unique identifier, always returns different values!
-    // Should be read only once!
-
-    private String getUID() {
-        amountOfTests.addAndGet(1);
-        return name + amountOfTests.toString();
-    }
 
     public void test(long duration) {
         results = new ArrayList<>();
         long startTime = System.currentTimeMillis();
 
-        String currentTestID = getUID();
+        String currentTestID = name + "#" + System.currentTimeMillis();
 
         MethodsSingleton.getSharedInstance().startTesting(name, currentTestID, startTime, duration);
 

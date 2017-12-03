@@ -2,14 +2,10 @@ import com.google.gson.Gson;
 import database.MyDAO;
 import database.object.representations.PlotPointDB;
 import database.object.representations.TestDB;
-import org.apache.commons.lang3.tuple.Pair;
 
 import spark.servlet.SparkApplication;
 import utils.ThreadPool;
-import vk.api.APIMethodTestable;
-import vk.api.Constants;
-import vk.api.CorsFilter;
-import vk.api.MethodsSingleton;
+import vk.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +31,16 @@ public class HelloWorld implements SparkApplication {
 
 		CorsFilter.apply();
 
-		List<APIMethodTestable> methods = MethodsSingleton.getSharedInstance().getMethods();
+		List<Class<? extends APIMethod>> methodsClasses = MethodsSingleton.getSharedInstance().getMethods();
+		List<APIMethodTestable> methods = new ArrayList<>();
+		for (Class<? extends  APIMethod> someMethodClass: methodsClasses) {
+			try {
+				methods.add(someMethodClass.newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {
+				System.out.println("ERROR WHILE DOING CASTS WITH REFLECTION API!");
+				e.printStackTrace();
+			}
+		}
 
 		sqlDao = MyDAO.getSharedInstance();
 
@@ -51,10 +56,10 @@ public class HelloWorld implements SparkApplication {
 
 		get("/queue", (req, res) -> {
 			List<TestingQueueEntry> queueEntries = MethodsSingleton.getSharedInstance()
-																	.getQueue()
-																	.stream()
-																	.map(TestingQueueEntry::getEnrtyWithCurrentTime)
-																	.collect(Collectors.toList());
+				.getQueue()
+				.stream()
+				.map(TestingQueueEntry::getEnrtyWithCurrentTime)
+				.collect(Collectors.toList());
 			return new Gson().toJson(queueEntries);
 		});
 
@@ -103,9 +108,13 @@ public class HelloWorld implements SparkApplication {
 			String methodName = params.get(":name");
 			System.out.println(methodName);
 			APIMethodTestable methodToRun = null;
-			for (APIMethodTestable method: methods) {
+			int methodIndex = -1;
+			for (int i = 0; i < methods.size(); i++) {
+				APIMethodTestable method = methods.get(i);
 				if (method.getName().equals(methodName)) {
+					methodIndex = i;
 					methodToRun = method;
+					break;
 				}
 			}
 			if (methodToRun == null) {
@@ -121,7 +130,7 @@ public class HelloWorld implements SparkApplication {
 					duration = Constants.ONE_DAY_DURATION;
 				}
 			}
-			final APIMethodTestable finalMethod = methodToRun;
+			final APIMethodTestable finalMethod = methodsClasses.get(methodIndex).newInstance();
 			final Long finalDuration = duration;
 			ThreadPool.getSharedInstance().addTask(() -> finalMethod.test(finalDuration));
 			return "[\"ok\"]";
